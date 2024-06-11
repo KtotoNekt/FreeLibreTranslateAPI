@@ -39,13 +39,7 @@ def __get_secret() -> str:
     return secret
 
 
-def translate(
-        query: str, 
-        source_lang: str = "auto", 
-        target_lang: str = "ru", 
-        alternatives: int = 0, 
-        ) -> AnswerAPI:
-
+def __get_response(query, source_lang, target_lang, alternatives):
     data = MultipartEncoder({
         'q': query,
         'source': source_lang,
@@ -56,9 +50,11 @@ def translate(
         'secret': __get_secret(),
     }, boundary=boundary)
 
-    resp = requests.post(URL + '/translate', cookies=cookies, headers=headers, data=data.to_string())
-    data = resp.json()
+    response = requests.post(URL + '/translate', cookies=cookies, headers=headers, data=data.to_string())
+    return response
 
+
+def __get_answer_api(source_lang, data):
     detected_language = None
     if source_lang == "auto":
         detected_language = DetectedLanguage(
@@ -71,3 +67,19 @@ def translate(
         data.get("alternatives", []),
         detected_language
     )
+
+
+def translate(
+        query: str, 
+        source_lang: str = "auto", 
+        target_lang: str = "ru", 
+        alternatives: int = 0, 
+        ) -> AnswerAPI:
+
+    resp = __get_response(query, source_lang, target_lang, alternatives)
+    data = resp.json()
+
+    if resp.status_code != 200:
+        raise Exception(data["error"])
+    
+    return __get_answer_api(source_lang, data)
