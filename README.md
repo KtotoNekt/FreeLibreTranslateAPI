@@ -29,7 +29,16 @@ pip install .
 ```python
 from libre_translate_api import translate
 
-# Перевод текста с английского на испанский
-answer = translate("Hello, world!", "en", "es")
-print(answer.translated_text)  # Вывод: Hola, mundo!
+
+answer = translate(
+    query="Hello, world!", # Текст, который нужно перевести
+    source_lang="auto", # Язык текста (auto - определить автоматически)
+    target_lang="ru", # На какой язык перевести
+    alternatives=3 # Кол-во альтернативных переводов (max = 3)
+    )
+
+
+print(answer.translated_text)  # Выведет переведенный текст
+print(answer.alternatives) # Выведет список альтернативных вариантов
+print(answer.detectedLanguage) # Информация об обнаруженном языке, если она доступна.  Может быть `None`, если информация об обнаруженном языке отсутствует. (Не None при source_lang = "auto")
 ```
